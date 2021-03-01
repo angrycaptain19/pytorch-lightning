@@ -99,9 +99,12 @@ class Result(Dict):
         self.update(d)
 
     def _assert_tensor_metric(self, name: str, potential_metric: Union[bool, Tensor, None, Any]):
-        if potential_metric is not None and not isinstance(potential_metric, bool):
-            if not isinstance(potential_metric, Tensor):
-                raise TypeError(f'{name} must be a torch.Tensor')
+        if (
+            potential_metric is not None
+            and not isinstance(potential_metric, bool)
+            and not isinstance(potential_metric, Tensor)
+        ):
+            raise TypeError(f'{name} must be a torch.Tensor')
 
     def _assert_grad_tensor_metric(self, name: str, x: Union[torch.Tensor, Any], additional_err: str = ''):
         if x is not None:
@@ -137,8 +140,6 @@ class Result(Dict):
         if not enable_graph and isinstance(value, torch.Tensor):
             value = value.detach()
 
-        # sync across workers when using distributed training
-        sync_fn = sync_fn or sync_ddp_if_available
         if sync_dist and isinstance(value, (torch.Tensor, numbers.Number)):
             is_dist_initialized = torch.distributed.is_available() and torch.distributed.is_initialized()
             # TODO: Find a way to make the reduction only once, so we don't need to clone.
@@ -146,6 +147,8 @@ class Result(Dict):
                 value = value.clone()
             else:
                 value = torch.tensor(value, device=device, dtype=torch.float)
+            # sync across workers when using distributed training
+            sync_fn = sync_fn or sync_ddp_if_available
             value = sync_fn(value, group=sync_dist_group, reduce_op=sync_dist_op)
 
         if isinstance(value, torch.Tensor) and value.device.type == "xla":
@@ -273,9 +276,10 @@ class Result(Dict):
         return torch.tensor(meta['_internal']['batch_sizes'])
 
     def get_callback_metrics(self) -> dict:
-        result = {'early_stop_on': self.early_stop_on, 'checkpoint_on': self.checkpoint_on}
-
-        return result
+        return {
+            'early_stop_on': self.early_stop_on,
+            'checkpoint_on': self.checkpoint_on,
+        }
 
     def _add_dataloader_idx(self, k: str, dataloader_idx: Union[int, None], add_dataloader_idx: bool) -> str:
         if dataloader_idx is not None and add_dataloader_idx:
@@ -493,16 +497,20 @@ class Result(Dict):
         # find the padding used for other values
         default_padding_idx = 0
         for name, value in result.items():
-            if isinstance(value, list) and len(value) > 0 and isinstance(value[0], torch.Tensor):
-                if name not in {'checkpoint_on', 'early_stop_on', 'minimize'}:
-                    default_padding_idx = meta[name]['tbptt_pad_token']
-                    break
+            if (
+                isinstance(value, list)
+                and len(value) > 0
+                and isinstance(value[0], torch.Tensor)
+                and name not in {'checkpoint_on', 'early_stop_on', 'minimize'}
+            ):
+                default_padding_idx = meta[name]['tbptt_pad_token']
+                break
 
         # pad across each key individually
         for name, value in result.items():
-            is_reserved = name in {'checkpoint_on', 'early_stop_on', 'minimize'}
             if isinstance(value, list) and len(value) > 0 and isinstance(value[0], torch.Tensor):
 
+                is_reserved = name in {'checkpoint_on', 'early_stop_on', 'minimize'}
                 if is_reserved:
                     padding_key = default_padding_idx
                 else:

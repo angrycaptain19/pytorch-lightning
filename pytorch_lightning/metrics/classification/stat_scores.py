@@ -162,10 +162,10 @@ class StatScores(Metric):
             raise ValueError(f"The `ignore_index` {ignore_index} is not valid for inputs with {num_classes} classes")
 
         if mdmc_reduce != "samplewise" and reduce != "samples":
-            if reduce == "micro":
-                zeros_shape = []
-            elif reduce == "macro":
+            if reduce == "macro":
                 zeros_shape = (num_classes, )
+            elif reduce == "micro":
+                zeros_shape = []
             default, reduce_fn = lambda: torch.zeros(zeros_shape, dtype=torch.long), "sum"
         else:
             default, reduce_fn = lambda: [], None

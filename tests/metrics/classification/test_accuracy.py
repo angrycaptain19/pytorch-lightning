@@ -29,7 +29,7 @@ def _sk_accuracy(preds, target, subset_accuracy):
     if mode == DataType.MULTIDIM_MULTICLASS and not subset_accuracy:
         sk_preds, sk_target = np.transpose(sk_preds, (0, 2, 1)), np.transpose(sk_target, (0, 2, 1))
         sk_preds, sk_target = sk_preds.reshape(-1, sk_preds.shape[2]), sk_target.reshape(-1, sk_target.shape[2])
-    elif mode == DataType.MULTIDIM_MULTICLASS and subset_accuracy:
+    elif mode == DataType.MULTIDIM_MULTICLASS:
         return np.all(sk_preds == sk_target, axis=(1, 2)).mean()
     elif mode == DataType.MULTILABEL and not subset_accuracy:
         sk_preds, sk_target = sk_preds.reshape(-1), sk_target.reshape(-1)

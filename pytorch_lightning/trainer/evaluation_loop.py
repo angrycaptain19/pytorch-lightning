@@ -174,10 +174,9 @@ class EvaluationLoop(object):
 
     def evaluation_step_end(self, *args, **kwargs):
         if self.trainer.testing:
-            output = self.trainer.call_hook('test_step_end', *args, **kwargs)
+            return self.trainer.call_hook('test_step_end', *args, **kwargs)
         else:
-            output = self.trainer.call_hook('validation_step_end', *args, **kwargs)
-        return output
+            return self.trainer.call_hook('validation_step_end', *args, **kwargs)
 
     def evaluation_epoch_end(self):
         # unset dataloder_idx in model
@@ -338,9 +337,10 @@ class EvaluationLoop(object):
 
         if len(step_log_metrics) > 0:
             # make the metrics appear as a different line in the same graph
-            metrics_by_epoch = {}
-            for k, v in step_log_metrics.items():
-                metrics_by_epoch[f'{k}/epoch_{self.trainer.current_epoch}'] = v
+            metrics_by_epoch = {
+                f'{k}/epoch_{self.trainer.current_epoch}': v
+                for k, v in step_log_metrics.items()
+            }
 
             self.trainer.logger_connector.log_metrics(metrics_by_epoch, {}, step=batch_idx)
 

@@ -298,14 +298,11 @@ class CombinedDataset(object):
             datasets, (Dataset, Iterable, type(None)), get_len, wrong_dtype=(Sequence, Mapping)
         )
 
+        if isinstance(all_lengths, (int, float)):
+            return all_lengths
         compute_func = CombinedDataset.COMPUTE_FUNCS[mode]
 
-        if isinstance(all_lengths, (int, float)):
-            length = all_lengths
-        else:
-            length = _nested_calc_num_data(all_lengths, compute_func)
-
-        return length
+        return _nested_calc_num_data(all_lengths, compute_func)
 
     def __len__(self) -> int:
         """Return the minimum length of the datasets."""

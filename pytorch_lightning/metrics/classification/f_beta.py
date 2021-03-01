@@ -193,7 +193,7 @@ class F1(FBeta):
         dist_sync_on_step: bool = False,
         process_group: Optional[Any] = None,
     ):
-        if multilabel is not False:
+        if multilabel:
             rank_zero_warn(f'The `multilabel={multilabel}` parameter is unused and will not have any effect.')
 
         super().__init__(

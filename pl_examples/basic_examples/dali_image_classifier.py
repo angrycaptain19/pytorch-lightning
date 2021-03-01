@@ -148,8 +148,7 @@ class LitClassifier(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         x, y = self.split_batch(batch)
         y_hat = self(x)
-        loss = F.cross_entropy(y_hat, y)
-        return loss
+        return F.cross_entropy(y_hat, y)
 
     def validation_step(self, batch, batch_idx):
         x, y = self.split_batch(batch)

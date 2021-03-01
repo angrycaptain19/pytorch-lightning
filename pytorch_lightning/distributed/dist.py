@@ -58,5 +58,4 @@ class LightningDistributed:
         data_tensor = torch.empty([length_tensor.item()], dtype=torch.uint8).to(self.device)
         self._broadcast(data_tensor, src=0, group=group)
         buffer = io.BytesIO(data_tensor.cpu().numpy())
-        obj = torch.load(buffer)
-        return obj
+        return torch.load(buffer)

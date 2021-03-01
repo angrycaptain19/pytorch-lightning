@@ -84,9 +84,7 @@ class CompositionalMetric(Metric):
             self.metric_b.persistent(mode=mode)
 
     def __repr__(self):
-        repr_str = (
+        return (
             self.__class__.__name__
             + f"(\n  {self.op.__name__}(\n    {repr(self.metric_a)},\n    {repr(self.metric_b)}\n  )\n)"
         )
-
-        return repr_str

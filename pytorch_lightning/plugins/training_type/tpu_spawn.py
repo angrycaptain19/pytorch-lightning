@@ -128,10 +128,10 @@ class TPUSpawnPlugin(DDPSpawnPlugin):
         rendezvous(f"pl.Trainer.{name}")
 
     def transfer_distrib_spawn_state_on_fit_end(self, results):
-        # TODO: is there a better way than accessing callback through model -> trainer -> callback?
-        best_model_path = self.lightning_module.trainer.checkpoint_callback.best_model_path
-
         if self.mp_queue is not None:
+            # TODO: is there a better way than accessing callback through model -> trainer -> callback?
+            best_model_path = self.lightning_module.trainer.checkpoint_callback.best_model_path
+
             rank_zero_warn("cleaning up ddp environment...")
 
             # save the last weights

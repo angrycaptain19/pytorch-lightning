@@ -182,7 +182,7 @@ class DeepSpeedPlugin(DDPPlugin):
         if config is None and self.DEEPSPEED_ENV_VAR in os.environ:
             rank_zero_info(f"Loading DeepSpeed config from set {self.DEEPSPEED_ENV_VAR} environment variable")
             config = os.environ[self.DEEPSPEED_ENV_VAR]
-        if isinstance(config, str) or isinstance(config, Path):
+        if isinstance(config, (str, Path)):
             if not os.path.isfile(config):
                 raise MisconfigurationException(
                     f"You passed in a path to a DeepSpeed config but the path does not exist: {config}"
@@ -277,8 +277,7 @@ class DeepSpeedPlugin(DDPPlugin):
 
     @property
     def distributed_sampler_kwargs(self):
-        distributed_sampler_kwargs = dict(num_replicas=self.world_size, rank=self.global_rank)
-        return distributed_sampler_kwargs
+        return dict(num_replicas=self.world_size, rank=self.global_rank)
 
     def init_optimizers(self, trainer, model: LightningModule) -> Tuple[List, List, List]:
         # Skip initializing optimizers here as DeepSpeed handles optimizers via config.
@@ -338,7 +337,11 @@ class DeepSpeedPlugin(DDPPlugin):
                     "enabled": True,
                     "opt_level": amp_level,
                 }
-        if "zero_optimization" in self.config and not ("amp" in self.config or "fp16" in self.config):
+        if (
+            "zero_optimization" in self.config
+            and "amp" not in self.config
+            and "fp16" not in self.config
+        ):
             raise MisconfigurationException("To use DeepSpeed ZeRO Optimization, you must set precision=16.")
 
     def _create_default_config(

@@ -58,8 +58,8 @@ class GradientAccumulationScheduler(Callback):
         if not scheduling:  # empty dict error
             raise TypeError("Empty dict cannot be interpreted correct")
 
-        for key in scheduling:
-            if not isinstance(key, int) or not isinstance(scheduling[key], int):
+        for key, value in scheduling.items():
+            if not isinstance(key, int) or not isinstance(value, int):
                 raise TypeError("All epoches and accumulation factor must be integers")
 
         minimal_epoch = min(scheduling.keys())
@@ -72,7 +72,7 @@ class GradientAccumulationScheduler(Callback):
         self.epochs = sorted(scheduling.keys())
 
     def going_to_accumulate_grad_batches(self):
-        return any([v > 1 for v in self.scheduling.values()])
+        return any(v > 1 for v in self.scheduling.values())
 
     def on_epoch_start(self, trainer, pl_module):
         epoch = trainer.current_epoch

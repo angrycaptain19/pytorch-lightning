@@ -62,8 +62,8 @@ class TrainerDataLoadingMixin(ABC):
 
         # ddp_spawn + num_workers > 0 don't mix! tell the user
         is_dataloader = isinstance(dataloader, DataLoader)
-        using_spawn = self.accelerator_connector.distributed_backend == "ddp_spawn"
         if is_dataloader and not on_windows:
+            using_spawn = self.accelerator_connector.distributed_backend == "ddp_spawn"
             if dataloader.num_workers > 0 and using_spawn:
                 rank_zero_warn(
                     'Dataloader(num_workers>0) and ddp_spawn do not mix well!'
@@ -185,8 +185,7 @@ class TrainerDataLoadingMixin(ABC):
     def _get_distributed_sampler(self, dataloader, shuffle):
         kwargs = self.distributed_sampler_kwargs
         kwargs['shuffle'] = shuffle and not self.overfit_batches
-        sampler = DistributedSampler(dataloader.dataset, **kwargs)
-        return sampler
+        return DistributedSampler(dataloader.dataset, **kwargs)
 
     def reset_train_dataloader(self, model: LightningModule) -> None:
         """Resets the train dataloader and initialises required variables
@@ -197,15 +196,18 @@ class TrainerDataLoadingMixin(ABC):
         """
         self.train_dataloader = self.request_dataloader(model.train_dataloader)
 
-        if self.overfit_batches > 0:
-            if hasattr(self.train_dataloader, 'sampler') and isinstance(self.train_dataloader.sampler, RandomSampler):
-                rank_zero_warn(
-                    'You requested to overfit but enabled training dataloader shuffling.'
-                    ' We are turning it off for you.'
-                )
-                self.train_dataloader = self.replace_sampler(
-                    self.train_dataloader, SequentialSampler(self.train_dataloader.dataset)
-                )
+        if (
+            self.overfit_batches > 0
+            and hasattr(self.train_dataloader, 'sampler')
+            and isinstance(self.train_dataloader.sampler, RandomSampler)
+        ):
+            rank_zero_warn(
+                'You requested to overfit but enabled training dataloader shuffling.'
+                ' We are turning it off for you.'
+            )
+            self.train_dataloader = self.replace_sampler(
+                self.train_dataloader, SequentialSampler(self.train_dataloader.dataset)
+            )
 
         # debugging
         self.dev_debugger.track_load_dataloader_call('train_dataloader', dataloaders=[self.train_dataloader])
@@ -289,11 +291,11 @@ class TrainerDataLoadingMixin(ABC):
 
         self.dev_debugger.track_load_dataloader_call(loader_name, dataloaders=dataloaders)
 
+        # shuffling in val and test set is bad practice
+        modes = ('val', 'test', 'predict')
         for loader_i in range(len(dataloaders)):
             loader = dataloaders[loader_i]
 
-            # shuffling in val and test set is bad practice
-            modes = ('val', 'test', 'predict')
             if mode in modes and hasattr(loader, 'sampler') and isinstance(loader.sampler, RandomSampler):
 
                 # when overfitting, the dataloader should not have sampler
@@ -310,7 +312,7 @@ class TrainerDataLoadingMixin(ABC):
                         ' this off for validation and test dataloaders.'
                     )
 
-        if any([dl is None for dl in dataloaders]):
+        if any(dl is None for dl in dataloaders):
             rank_zero_warn("One of given dataloaders is None and it will be skipped.")
 
         # add samplers

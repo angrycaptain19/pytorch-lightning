@@ -338,12 +338,12 @@ def test_call_back_validator(tmpdir):
 
     validator = CallbackHookNameValidator()
 
+    on_epoch = True
     for func_name in funcs_name:
         # This summarizes where and what is currently possible to log using `self.log`
         is_stage = "train" in func_name or "test" in func_name or "validation" in func_name
         is_start = "start" in func_name or "batch" in func_name
         on_step = is_stage and is_start
-        on_epoch = True
         # creating allowed condition
         allowed = (
             is_stage or "batch" in func_name or "epoch" in func_name or "grad" in func_name or "backward" in func_name
@@ -381,8 +381,7 @@ def test_epoch_results_cache_dp(tmpdir):
             return result
 
         def training_step_end(self, training_step_outputs):  # required for dp
-            loss = training_step_outputs["loss"].mean()
-            return loss
+            return training_step_outputs["loss"].mean()
 
         def training_epoch_end(self, outputs):
             assert all(out["loss"].device == root_device for out in outputs)

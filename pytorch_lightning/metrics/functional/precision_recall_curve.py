@@ -39,11 +39,7 @@ def _binary_clf_curve(
     preds = preds[desc_score_indices]
     target = target[desc_score_indices]
 
-    if sample_weights is not None:
-        weight = sample_weights[desc_score_indices]
-    else:
-        weight = 1.
-
+    weight = 1. if sample_weights is None else sample_weights[desc_score_indices]
     # pred typically has many tied values. Here we extract
     # the indices associated with the distinct values. We also
     # concatenate a value for the end of the curve.
@@ -52,13 +48,13 @@ def _binary_clf_curve(
     target = (target == pos_label).to(torch.long)
     tps = torch.cumsum(target * weight, dim=0)[threshold_idxs]
 
-    if sample_weights is not None:
+    if sample_weights is None:
+        fps = 1 + threshold_idxs - tps
+
+    else:
         # express fps as a cumsum to ensure fps is increasing even in
         # the presence of floating point errors
         fps = torch.cumsum((1 - target) * weight, dim=0)[threshold_idxs]
-    else:
-        fps = 1 + threshold_idxs - tps
-
     return fps, tps, preds[threshold_idxs]
 
 
@@ -68,7 +64,7 @@ def _precision_recall_curve_update(
     num_classes: Optional[int] = None,
     pos_label: Optional[int] = None,
 ) -> Tuple[torch.Tensor, torch.Tensor, int, int]:
-    if not (len(preds.shape) == len(target.shape) or len(preds.shape) == len(target.shape) + 1):
+    if not len(preds.shape) in [len(target.shape), len(target.shape) + 1]:
         raise ValueError("preds and target must have same number of dimensions, or one additional dimension for preds")
     # single class evaluation
     if len(preds.shape) == len(target.shape):

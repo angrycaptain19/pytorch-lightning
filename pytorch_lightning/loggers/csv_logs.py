@@ -154,8 +154,7 @@ class CSVLogger(LightningLoggerBase):
         """
         # create a pseudo standard path ala test-tube
         version = self.version if isinstance(self.version, str) else f"version_{self.version}"
-        log_dir = os.path.join(self.root_dir, version)
-        return log_dir
+        return os.path.join(self.root_dir, version)
 
     @property
     def save_dir(self) -> Optional[str]:
@@ -217,12 +216,14 @@ class CSVLogger(LightningLoggerBase):
             log.warning('Missing logger folder: %s', root_dir)
             return 0
 
-        existing_versions = []
-        for d in os.listdir(root_dir):
-            if os.path.isdir(os.path.join(root_dir, d)) and d.startswith("version_"):
-                existing_versions.append(int(d.split("_")[1]))
+        existing_versions = [
+            int(d.split("_")[1])
+            for d in os.listdir(root_dir)
+            if os.path.isdir(os.path.join(root_dir, d))
+            and d.startswith("version_")
+        ]
 
-        if len(existing_versions) == 0:
+        if not existing_versions:
             return 0
 
         return max(existing_versions) + 1

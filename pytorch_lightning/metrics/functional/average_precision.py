@@ -44,10 +44,10 @@ def _average_precision_compute(
     if num_classes == 1:
         return -torch.sum((recall[1:] - recall[:-1]) * precision[:-1])
 
-    res = []
-    for p, r in zip(precision, recall):
-        res.append(-torch.sum((r[1:] - r[:-1]) * p[:-1]))
-    return res
+    return [
+        -torch.sum((r[1:] - r[:-1]) * p[:-1])
+        for p, r in zip(precision, recall)
+    ]
 
 
 def average_precision(

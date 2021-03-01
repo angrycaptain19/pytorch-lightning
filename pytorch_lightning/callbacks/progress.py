@@ -315,7 +315,7 @@ class ProgressBar(ProgressBarBase):
 
     def init_sanity_tqdm(self) -> tqdm:
         """ Override this to customize the tqdm bar for the validation sanity run. """
-        bar = tqdm(
+        return tqdm(
             desc='Validation sanity check',
             position=(2 * self.process_position),
             disable=self.is_disabled,
@@ -323,11 +323,10 @@ class ProgressBar(ProgressBarBase):
             dynamic_ncols=True,
             file=sys.stdout,
         )
-        return bar
 
     def init_train_tqdm(self) -> tqdm:
         """ Override this to customize the tqdm bar for training. """
-        bar = tqdm(
+        return tqdm(
             desc='Training',
             initial=self.train_batch_idx,
             position=(2 * self.process_position),
@@ -337,11 +336,10 @@ class ProgressBar(ProgressBarBase):
             file=sys.stdout,
             smoothing=0,
         )
-        return bar
 
     def init_predict_tqdm(self) -> tqdm:
         """ Override this to customize the tqdm bar for predicting. """
-        bar = tqdm(
+        return tqdm(
             desc='Predicting',
             initial=self.train_batch_idx,
             position=(2 * self.process_position),
@@ -351,11 +349,10 @@ class ProgressBar(ProgressBarBase):
             file=sys.stdout,
             smoothing=0,
         )
-        return bar
 
     def init_validation_tqdm(self) -> tqdm:
         """ Override this to customize the tqdm bar for validation. """
-        bar = tqdm(
+        return tqdm(
             desc='Validating',
             position=(2 * self.process_position + 1),
             disable=self.is_disabled,
@@ -363,11 +360,10 @@ class ProgressBar(ProgressBarBase):
             dynamic_ncols=True,
             file=sys.stdout
         )
-        return bar
 
     def init_test_tqdm(self) -> tqdm:
         """ Override this to customize the tqdm bar for testing. """
-        bar = tqdm(
+        return tqdm(
             desc="Testing",
             position=(2 * self.process_position),
             disable=self.is_disabled,
@@ -375,7 +371,6 @@ class ProgressBar(ProgressBarBase):
             dynamic_ncols=True,
             file=sys.stdout
         )
-        return bar
 
     def on_sanity_check_start(self, trainer, pl_module):
         super().on_sanity_check_start(trainer, pl_module)

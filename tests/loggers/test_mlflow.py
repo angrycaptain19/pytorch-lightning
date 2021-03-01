@@ -180,9 +180,9 @@ def test_mlflow_logger_with_unexpected_characters(client, mlflow, tmpdir):
     Test that the logger raises warning with special characters not accepted by MLFlow.
     """
     logger = MLFlowLogger('test', save_dir=tmpdir)
-    metrics = {'[some_metric]': 10}
-
     with pytest.warns(RuntimeWarning, match='special characters in metric name'):
+        metrics = {'[some_metric]': 10}
+
         logger.log_metrics(metrics)
 
 

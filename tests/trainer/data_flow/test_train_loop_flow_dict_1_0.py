@@ -116,8 +116,7 @@ def test__training_step__epoch_end__flow_dict(tmpdir):
             acc = acc + batch_idx
 
             self.training_step_called = True
-            out = {'loss': acc, 'random_things': [1, 'a', torch.tensor(2)]}
-            return out
+            return {'loss': acc, 'random_things': [1, 'a', torch.tensor(2)]}
 
         def training_epoch_end(self, outputs):
             self.training_epoch_end_called = True

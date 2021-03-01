@@ -29,9 +29,7 @@ from tests.helpers.boring_model import RandomDataset
 @pytest.mark.skipif(not _FAIRSCALE_PIPE_AVAILABLE, reason="test requires FairScale to be installed")
 @mock.patch.dict(os.environ, {"PL_DEV_DEBUG": "1"})
 @pytest.mark.skipif(torch.cuda.device_count() < 2, reason="test requires multi-GPU machine")
-@pytest.mark.skipif(
-    not os.getenv("PL_RUNNING_SPECIAL_TESTS", '0') == '1', reason="test should be run outside of pytest"
-)
+@pytest.mark.skipif(os.getenv("PL_RUNNING_SPECIAL_TESTS", '0') != '1', reason="test should be run outside of pytest")
 def test_rpc_sequential_plugin_manual(tmpdir, args=None):
     model = SequentialModelRPCManual()
     trainer = Trainer(
@@ -57,9 +55,7 @@ def test_rpc_sequential_plugin_manual(tmpdir, args=None):
 @pytest.mark.skipif(not _FAIRSCALE_PIPE_AVAILABLE, reason="test requires FairScale to be installed")
 @mock.patch.dict(os.environ, {"PL_DEV_DEBUG": "1"})
 @pytest.mark.skipif(torch.cuda.device_count() < 2, reason="test requires multi-GPU machine")
-@pytest.mark.skipif(
-    not os.getenv("PL_RUNNING_SPECIAL_TESTS", '0') == '1', reason="test should be run outside of pytest"
-)
+@pytest.mark.skipif(os.getenv("PL_RUNNING_SPECIAL_TESTS", '0') != '1', reason="test should be run outside of pytest")
 def test_rpc_sequential_plugin_manual_amp(tmpdir, args=None):
     model = SequentialModelRPCManual()
     trainer = Trainer(
@@ -83,9 +79,7 @@ def test_rpc_sequential_plugin_manual_amp(tmpdir, args=None):
 @pytest.mark.skipif(not _FAIRSCALE_PIPE_AVAILABLE, reason="test requires FairScale to be installed")
 @mock.patch.dict(os.environ, {"PL_DEV_DEBUG": "1"})
 @pytest.mark.skipif(torch.cuda.device_count() < 2, reason="test requires multi-GPU machine")
-@pytest.mark.skipif(
-    not os.getenv("PL_RUNNING_SPECIAL_TESTS", '0') == '1', reason="test should be run outside of pytest"
-)
+@pytest.mark.skipif(os.getenv("PL_RUNNING_SPECIAL_TESTS", '0') != '1', reason="test should be run outside of pytest")
 def test_rpc_sequential_plugin_automatic(tmpdir, args=None):
     model = SequentialModelRPCAutomatic()
     trainer = Trainer(
@@ -111,9 +105,7 @@ def test_rpc_sequential_plugin_automatic(tmpdir, args=None):
 @pytest.mark.skipif(not _FAIRSCALE_PIPE_AVAILABLE, reason="test requires FairScale to be installed")
 @mock.patch.dict(os.environ, {"PL_DEV_DEBUG": "1"})
 @pytest.mark.skipif(torch.cuda.device_count() < 2, reason="test requires multi-GPU machine")
-@pytest.mark.skipif(
-    not os.getenv("PL_RUNNING_SPECIAL_TESTS", '0') == '1', reason="test should be run outside of pytest"
-)
+@pytest.mark.skipif(os.getenv("PL_RUNNING_SPECIAL_TESTS", '0') != '1', reason="test should be run outside of pytest")
 def test_rpc_sequential_plugin_with_wrong_balance(tmpdir, args=None):
     model = SequentialModelRPCAutomatic()
     trainer = Trainer(
@@ -152,8 +144,7 @@ class SequentialModelRPCManual(LightningModule):
 
     def step(self, x):
         x = self(x)
-        out = torch.nn.functional.mse_loss(x, torch.ones_like(x))
-        return out
+        return torch.nn.functional.mse_loss(x, torch.ones_like(x))
 
     def training_step(self, batch, batch_idx):
         opt = self.optimizers()
@@ -168,8 +159,7 @@ class SequentialModelRPCManual(LightningModule):
 
     def validation_step(self, batch, batch_idx):
         output = self.sequential_module(batch)
-        loss = self.loss(output)
-        return loss
+        return self.loss(output)
 
     def test_step(self, batch, batch_idx):
         output = self.sequential_module(batch)

@@ -6,9 +6,9 @@ from pytorch_lightning.metrics.functional.image_gradients import image_gradients
 
 def test_invalid_input_img_type():
     """Test Whether the module successfully handles invalid input data type"""
-    invalid_dummy_input = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-
     with pytest.raises(TypeError):
+        invalid_dummy_input = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+
         image_gradients(invalid_dummy_input)
 
 

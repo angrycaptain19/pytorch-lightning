@@ -137,7 +137,7 @@ class CheckpointConnector:
                 ' This is probably due to `ModelCheckpoint.save_weights_only` being set to `True`.'
             )
 
-        if any([key in checkpoint for key in DEPRECATED_CHECKPOINT_KEYS]):
+        if any(key in checkpoint for key in DEPRECATED_CHECKPOINT_KEYS):
             raise ValueError(
                 "The checkpoint you're attempting to load follows an"
                 " outdated schema. You can upgrade to the current schema by running"
@@ -292,9 +292,11 @@ class CheckpointConnector:
             checkpoint['optimizer_states'] = optimizer_states
 
             # dump lr schedulers
-            lr_schedulers = []
-            for scheduler in self.trainer.lr_schedulers:
-                lr_schedulers.append(scheduler['scheduler'].state_dict())
+            lr_schedulers = [
+                scheduler['scheduler'].state_dict()
+                for scheduler in self.trainer.lr_schedulers
+            ]
+
             checkpoint['lr_schedulers'] = lr_schedulers
 
             # dump amp scaling
@@ -367,7 +369,7 @@ class CheckpointConnector:
         # check corresponding file existence
         files = [os.path.basename(f["name"]) for f in fs.listdir(dir_path)]
         files = [x for x in files if name_key in x]
-        if len(files) == 0:
+        if not files:
             return None
 
         # extract suffix number

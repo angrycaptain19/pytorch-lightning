@@ -80,8 +80,7 @@ def set_random_master_port():
 
 
 def init_checkpoint_callback(logger):
-    checkpoint = ModelCheckpoint(dirpath=logger.save_dir)
-    return checkpoint
+    return ModelCheckpoint(dirpath=logger.save_dir)
 
 
 def pl_multi_process_test(func):

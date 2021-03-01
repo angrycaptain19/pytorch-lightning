@@ -190,8 +190,7 @@ def _tpu_cores_valid(tpu_cores):
         has_1_tpu_idx = len(tpu_cores) == 1
         is_valid_tpu_idx = tpu_cores[0] in range(1, 9)
 
-        is_valid_tpu_core_choice = has_1_tpu_idx and is_valid_tpu_idx
-        return is_valid_tpu_core_choice
+        return has_1_tpu_idx and is_valid_tpu_idx
 
     return False
 

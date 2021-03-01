@@ -527,15 +527,13 @@ class Trainer(
 
     def train_or_test_or_predict(self):
         if self.testing:
-            results = self.run_test()
+            return self.run_test()
 
         elif self.predicting:
-            results = self.run_predict()
+            return self.run_predict()
 
         else:
-            results = self.run_train()
-
-        return results
+            return self.run_train()
 
     def _pre_training_routine(self):
         # wait for all to join if on distributed
@@ -803,8 +801,7 @@ class Trainer(
                 with self.profiler.profile("predict"):
                     self.predict_loop.predict(batch, batch_idx, dataloader_idx)
 
-        results = self.predict_loop.on_predict_epoch_end()
-        return results
+        return self.predict_loop.on_predict_epoch_end()
 
     def run_sanity_check(self, ref_model):
         using_val_step = ref_model.val_dataloader is not None and is_overridden('validation_step', ref_model)
@@ -911,7 +908,7 @@ class Trainer(
                     f'specify a path for a checkpoint .test(ckpt_path=PATH)'
                 )
                 return {}
-            if not self._device_type == DeviceType.TPU:
+            if self._device_type != DeviceType.TPU:
                 self.accelerator.barrier()
 
             ckpt = pl_load(ckpt_path, map_location=lambda storage, loc: storage)

@@ -35,10 +35,9 @@ class DataConnector(object):
         self.trainer._is_data_prepared = False
 
     def get_profiled_train_dataloader(self, train_dataloader):
-        profiled_dl = self.trainer.profiler.profile_iterable(
+        return self.trainer.profiler.profile_iterable(
             enumerate(self._with_is_last(train_dataloader)), "get_train_batch"
         )
-        return profiled_dl
 
     def _with_is_last(self, iterable):
         """Pass through values from the given iterable with an added boolean indicating if this is the last item.

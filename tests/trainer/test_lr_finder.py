@@ -79,16 +79,10 @@ def test_trainer_reset_correctly(tmpdir):
     changed_attributes = [
         'callbacks', 'logger', 'max_steps', 'auto_lr_find', 'accumulate_grad_batches', 'checkpoint_callback'
     ]
-    attributes_before = {}
-    for ca in changed_attributes:
-        attributes_before[ca] = getattr(trainer, ca)
-
+    attributes_before = {ca: getattr(trainer, ca) for ca in changed_attributes}
     _ = trainer.tuner.lr_find(model, num_training=5)
 
-    attributes_after = {}
-    for ca in changed_attributes:
-        attributes_after[ca] = getattr(trainer, ca)
-
+    attributes_after = {ca: getattr(trainer, ca) for ca in changed_attributes}
     for key in changed_attributes:
         assert attributes_before[key] == attributes_after[key], \
             f'Attribute {key} was not reset correctly after learning rate finder'
@@ -114,11 +108,7 @@ def test_trainer_arg_bool(tmpdir, use_hparams):
     )
 
     trainer.tune(model)
-    if use_hparams:
-        after_lr = model.hparams.learning_rate
-    else:
-        after_lr = model.learning_rate
-
+    after_lr = model.hparams.learning_rate if use_hparams else model.learning_rate
     assert before_lr != after_lr, \
         'Learning rate was not altered after running learning rate finder'
 
@@ -143,11 +133,7 @@ def test_trainer_arg_str(tmpdir, use_hparams):
     )
 
     trainer.tune(model)
-    if use_hparams:
-        after_lr = model.hparams.my_fancy_lr
-    else:
-        after_lr = model.my_fancy_lr
-
+    after_lr = model.hparams.my_fancy_lr if use_hparams else model.my_fancy_lr
     assert before_lr != after_lr, \
         'Learning rate was not altered after running learning rate finder'
 

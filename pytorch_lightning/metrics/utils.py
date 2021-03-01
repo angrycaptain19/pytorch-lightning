@@ -64,21 +64,26 @@ def _input_format_classification_one_hot(
         preds: one hot tensor of shape [num_classes, -1] with predicted labels
         target: one hot tensors of shape [num_classes, -1] with true labels
     """
-    if not (preds.ndim == target.ndim or preds.ndim == target.ndim + 1):
+    if not preds.ndim in [target.ndim, target.ndim + 1]:
         raise ValueError("preds and target must have same number of dimensions, or one additional dimension for preds")
 
     if preds.ndim == target.ndim + 1:
         # multi class probabilites
         preds = torch.argmax(preds, dim=1)
 
-    if preds.ndim == target.ndim and preds.dtype in (torch.long, torch.int) and num_classes > 1 and not multilabel:
-        # multi-class
-        preds = to_onehot(preds, num_classes=num_classes)
-        target = to_onehot(target, num_classes=num_classes)
+    if preds.ndim == target.ndim:
+        if (
+            preds.dtype in (torch.long, torch.int)
+            and num_classes > 1
+            and not multilabel
+        ):
+            # multi-class
+            preds = to_onehot(preds, num_classes=num_classes)
+            target = to_onehot(target, num_classes=num_classes)
 
-    elif preds.ndim == target.ndim and preds.is_floating_point():
-        # binary or multilabel probablities
-        preds = (preds >= threshold).long()
+        elif preds.is_floating_point():
+            # binary or multilabel probablities
+            preds = (preds >= threshold).long()
 
     # transpose class as first dim and reshape
     if preds.ndim > 1:

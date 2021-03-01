@@ -22,8 +22,7 @@ from tests.helpers.boring_model import BoringModel
 class TestModel(BoringModel):
 
     def training_step(self, batch, batch_idx):
-        acc = self.step(batch[0])
-        return acc
+        return self.step(batch[0])
 
 
 @mock.patch.dict(os.environ, {"PL_DEV_DEBUG": "1"})

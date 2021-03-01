@@ -242,4 +242,4 @@ def test_dpp_reduce_mean_pbar(tmpdir):
             is_in = True
             assert pbar_metrics["loss_2"].item() == 1
     if distributed_backend == "ddp":
-        assert is_in is True
+        assert is_in

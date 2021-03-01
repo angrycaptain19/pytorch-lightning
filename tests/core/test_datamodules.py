@@ -386,8 +386,7 @@ def test_full_loop_dp(tmpdir):
 
         def training_step(self, batch, batch_idx):
             out = self._step(batch, batch_idx)
-            loss = F.cross_entropy(out['logits'], out['y'])
-            return loss
+            return F.cross_entropy(out['logits'], out['y'])
 
         def validation_step(self, batch, batch_idx):
             return self._step(batch, batch_idx)

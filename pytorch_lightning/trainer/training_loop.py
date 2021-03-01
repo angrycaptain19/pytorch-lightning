@@ -91,8 +91,7 @@ class TrainLoop:
 
     @property
     def num_optimizers(self):
-        num_optimizers = len(self.get_optimizers_iterable())
-        return num_optimizers
+        return len(self.get_optimizers_iterable())
 
     def should_skip_training(self):
         should_by_max_steps = self.trainer.max_steps is not None and self.trainer.global_step >= self.trainer.max_steps
@@ -272,10 +271,13 @@ class TrainLoop:
         self.trainer.dev_debugger.track_train_loss_history(batch_idx, untouched_loss.detach())
 
     def _check_training_step_output(self, training_step_output):
-        if isinstance(training_step_output, torch.Tensor) and not self.automatic_optimization:
-            if training_step_output.grad_fn is None:
-                # TODO: Find why - RuntimeError: Expected to mark a variable ready only once ...
-                raise MisconfigurationException("In manual optimization, `training_step` should not return a Tensor")
+        if (
+            isinstance(training_step_output, torch.Tensor)
+            and not self.automatic_optimization
+            and training_step_output.grad_fn is None
+        ):
+            # TODO: Find why - RuntimeError: Expected to mark a variable ready only once ...
+            raise MisconfigurationException("In manual optimization, `training_step` should not return a Tensor")
 
     def training_step(self, split_batch, batch_idx, opt_idx, hiddens):
         # give the PL module a result for logging
@@ -448,10 +450,13 @@ class TrainLoop:
 
     def _track_gradient_norm(self):
         grad_norm_dict = {}
-        if (self.trainer.global_step + 1) % self.trainer.log_every_n_steps == 0:
-            if float(self.trainer.track_grad_norm) > 0:
-                model = self.trainer.lightning_module
-                grad_norm_dict = model.grad_norm(self.trainer.track_grad_norm)
+        if (
+            self.trainer.global_step + 1
+        ) % self.trainer.log_every_n_steps == 0 and float(
+            self.trainer.track_grad_norm
+        ) > 0:
+            model = self.trainer.lightning_module
+            grad_norm_dict = model.grad_norm(self.trainer.track_grad_norm)
         return grad_norm_dict
 
     def process_hiddens(self, opt_closure_result):

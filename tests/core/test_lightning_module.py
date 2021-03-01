@@ -200,7 +200,7 @@ def test_toggle_untoggle_2_optimizers_no_shared_parameters(tmpdir):
                 assert self.layer_2[3].weight.requires_grad is False
                 assert self.layer_2[5].weight.requires_grad is False
 
-            if optimizer_idx == 1:
+            elif optimizer_idx == 1:
                 assert self.layer_1[0].weight.requires_grad is False
                 assert self.layer_1[2].weight.requires_grad is False
                 assert self.layer_1[4].weight.requires_grad is False
@@ -292,7 +292,7 @@ def test_toggle_untoggle_3_optimizers_shared_parameters(tmpdir):
                 assert self.layer_3[3].weight.requires_grad is False
                 assert self.layer_3[5].weight.requires_grad is False
 
-            if optimizer_idx == 1:
+            elif optimizer_idx == 1:
                 assert self.layer_1[0].weight.requires_grad is False
                 assert self.layer_1[2].weight.requires_grad is False
                 assert self.layer_1[4].weight.requires_grad is False
@@ -305,7 +305,7 @@ def test_toggle_untoggle_3_optimizers_shared_parameters(tmpdir):
                 assert self.layer_3[3].weight.requires_grad is True
                 assert self.layer_3[5].weight.requires_grad is False
 
-            if optimizer_idx == 2:
+            elif optimizer_idx == 2:
                 assert self.layer_1[0].weight.requires_grad is True
                 assert self.layer_1[2].weight.requires_grad is False
                 assert self.layer_1[4].weight.requires_grad is False
@@ -327,10 +327,8 @@ def test_toggle_untoggle_3_optimizers_shared_parameters(tmpdir):
 
         @staticmethod
         def combine_generators(gen_1, gen_2):
-            for p in gen_1:
-                yield p
-            for p in gen_2:
-                yield p
+            yield from gen_1
+            yield from gen_2
 
         def configure_optimizers(self):
             optimizer_1 = SGD(self.combine_generators(

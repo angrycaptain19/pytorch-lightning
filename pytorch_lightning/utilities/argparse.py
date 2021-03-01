@@ -47,7 +47,10 @@ def from_argparse_args(cls, args: Union[Namespace, ArgumentParser], **kwargs):
 
     # we only want to pass in valid Trainer args, the rest may be user specific
     valid_kwargs = inspect.signature(cls.__init__).parameters
-    trainer_kwargs = dict((name, params[name]) for name in valid_kwargs if name in params)
+    trainer_kwargs = {
+        name: params[name] for name in valid_kwargs if name in params
+    }
+
     trainer_kwargs.update(**kwargs)
 
     return cls(**trainer_kwargs)
@@ -98,7 +101,7 @@ def parse_env_variables(cls, template: str = "PL_%(cls_name)s_%(cls_argument)s")
     for arg_name, _, _ in cls_arg_defaults:
         env = template % {'cls_name': cls.__name__.upper(), 'cls_argument': arg_name.upper()}
         val = os.environ.get(env)
-        if not (val is None or val == ''):
+        if val is not None and val != '':
             # todo: specify the possible exception
             with suppress(Exception):
                 # converting to native types like int/float/bool
@@ -184,7 +187,7 @@ def add_argparse_args(cls, parent_parser: ArgumentParser) -> ArgumentParser:
         else:
             use_type = arg_types[0]
 
-        if arg == 'gpus' or arg == 'tpu_cores':
+        if arg in ['gpus', 'tpu_cores']:
             use_type = _gpus_allowed_type
             arg_default = _gpus_arg_default
 

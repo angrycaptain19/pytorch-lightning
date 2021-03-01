@@ -453,7 +453,7 @@ def test_nested_datasouce_batch(tmpdir):
             self.data = torch.randn(length, size)
 
         def __getitem__(self, index):
-            x = {
+            return {
                 'post_text': ['bird is fast', 'big cat'],
                 'dense_0': [
                     torch.tensor([-0.1000, 0.2000], dtype=torch.float64),
@@ -462,7 +462,6 @@ def test_nested_datasouce_batch(tmpdir):
                 'post_id': ['115', '116'],
                 'label': [torch.tensor([0, 1]), torch.tensor([1, 1], dtype=torch.uint8)]
             }
-            return x
 
         def __len__(self):
             return self.len
@@ -663,11 +662,10 @@ def test_log_works_in_train_callback(tmpdir):
     def get_expected_output(func_attr, original_values):
         if func_attr["on_epoch"] and not func_attr["on_step"]:
             # Apply mean on values
-            expected_output = np.mean(original_values)
+            return np.mean(original_values)
         else:
             # Keep the latest value
-            expected_output = np.max(original_values)
-        return expected_output
+            return np.max(original_values)
 
     # Make sure the func_name output equals the average from all logged values when on_epoch true
     # pop extra keys
