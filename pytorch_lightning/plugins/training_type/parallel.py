@@ -74,8 +74,7 @@ class ParallelPlugin(TrainingTypePlugin, ABC):
 
     @property
     def distributed_sampler_kwargs(self):
-        distributed_sampler_kwargs = dict(num_replicas=len(self.parallel_devices), rank=self.global_rank)
-        return distributed_sampler_kwargs
+        return dict(num_replicas=len(self.parallel_devices), rank=self.global_rank)
 
     def reduce_early_stopping_decision(self, should_stop: bool) -> bool:
         should_stop = torch.tensor(int(should_stop), device=self.lightning_module.device)

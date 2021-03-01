@@ -60,9 +60,7 @@ class SyncBNModule(LightningModule):
         x, y = batch
 
         y_hat, _ = self(x, batch_idx)
-        loss = F.cross_entropy(y_hat, y)
-
-        return loss
+        return F.cross_entropy(y_hat, y)
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.linear.parameters(), lr=0.02)
@@ -71,9 +69,7 @@ class SyncBNModule(LightningModule):
 # TODO: Fatal Python error: Bus error
 @pytest.mark.skip(reason="Fatal Python error: Bus error")
 @pytest.mark.skipif(torch.cuda.device_count() < 2, reason="test requires multi-GPU machine")
-@pytest.mark.skipif(
-    not os.getenv("PL_RUNNING_SPECIAL_TESTS", '0') == '1', reason="test should be run outside of pytest"
-)
+@pytest.mark.skipif(os.getenv("PL_RUNNING_SPECIAL_TESTS", '0') != '1', reason="test should be run outside of pytest")
 def test_sync_batchnorm_ddp(tmpdir):
     seed_everything(234)
     set_random_master_port()

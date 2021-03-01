@@ -30,13 +30,13 @@ def _accuracy_update(
     if mode == DataType.BINARY or (mode == DataType.MULTILABEL and subset_accuracy):
         correct = (preds == target).all(dim=1).sum()
         total = torch.tensor(target.shape[0], device=target.device)
-    elif mode == DataType.MULTILABEL and not subset_accuracy:
+    elif mode == DataType.MULTILABEL:
         correct = (preds == target).sum()
         total = torch.tensor(target.numel(), device=target.device)
     elif mode == DataType.MULTICLASS or (mode == DataType.MULTIDIM_MULTICLASS and not subset_accuracy):
         correct = (preds * target).sum()
         total = target.sum()
-    elif mode == DataType.MULTIDIM_MULTICLASS and subset_accuracy:
+    elif mode == DataType.MULTIDIM_MULTICLASS:
         sample_correct = (preds * target).sum(dim=(1, 2))
         correct = (sample_correct == target.shape[2]).sum()
         total = torch.tensor(target.shape[0], device=target.device)

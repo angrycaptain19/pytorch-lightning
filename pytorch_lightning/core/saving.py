@@ -153,8 +153,7 @@ class ModelIO(object):
         # override the hparams with values that were passed in
         checkpoint[cls.CHECKPOINT_HYPER_PARAMS_KEY].update(kwargs)
 
-        model = cls._load_model_state(checkpoint, strict=strict, **kwargs)
-        return model
+        return cls._load_model_state(checkpoint, strict=strict, **kwargs)
 
     @classmethod
     def _load_model_state(cls, checkpoint: Dict[str, Any], strict: bool = True, **cls_kwargs_new):
@@ -351,12 +350,11 @@ def load_hparams_from_yaml(config_yaml: str, use_omegaconf: bool = True) -> Dict
     with fs.open(config_yaml, "r") as fp:
         hparams = yaml.load(fp, Loader=yaml.UnsafeLoader)
 
-    if _OMEGACONF_AVAILABLE:
-        if use_omegaconf:
-            try:
-                return OmegaConf.create(hparams)
-            except (UnsupportedValueType, ValidationError):
-                pass
+    if _OMEGACONF_AVAILABLE and use_omegaconf:
+        try:
+            return OmegaConf.create(hparams)
+        except (UnsupportedValueType, ValidationError):
+            pass
     return hparams
 
 

@@ -109,6 +109,4 @@ def bleu_score(
     log_precision_scores = torch.tensor([1.0 / n_gram] * n_gram) * torch.log(precision_scores)
     geometric_mean = torch.exp(torch.sum(log_precision_scores))
     brevity_penalty = torch.tensor(1.0) if c > r else torch.exp(1 - (ref_len / trans_len))
-    bleu = brevity_penalty * geometric_mean
-
-    return bleu
+    return brevity_penalty * geometric_mean

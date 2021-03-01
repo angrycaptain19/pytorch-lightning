@@ -189,11 +189,10 @@ class AttributeDict(Dict):
     def __repr__(self):
         if not len(self):
             return ""
-        max_key_length = max([len(str(k)) for k in self])
+        max_key_length = max(len(str(k)) for k in self)
         tmp_name = '{:' + str(max_key_length + 3) + 's} {}'
         rows = [tmp_name.format(f'"{n}":', self[n]) for n in sorted(self.keys())]
-        out = '\n'.join(rows)
-        return out
+        return '\n'.join(rows)
 
 
 def _lightning_get_all_attr_holders(model, attribute):
@@ -210,9 +209,8 @@ def _lightning_get_all_attr_holders(model, attribute):
         holders.append(model)
 
     # Check if attribute in model.hparams, either namespace or dict
-    if hasattr(model, 'hparams'):
-        if attribute in model.hparams:
-            holders.append(model.hparams)
+    if hasattr(model, 'hparams') and attribute in model.hparams:
+        holders.append(model.hparams)
 
     # Check if the attribute in datamodule (datamodule gets registered in Trainer)
     if trainer is not None and trainer.datamodule is not None and hasattr(trainer.datamodule, attribute):

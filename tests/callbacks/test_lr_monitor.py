@@ -133,8 +133,7 @@ def test_lr_monitor_no_lr_scheduler(tmpdir):
     class CustomBoringModel(BoringModel):
 
         def configure_optimizers(self):
-            optimizer = optim.SGD(self.parameters(), lr=0.1)
-            return optimizer
+            return optim.SGD(self.parameters(), lr=0.1)
 
     model = CustomBoringModel()
 

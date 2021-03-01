@@ -188,14 +188,12 @@ def instantiate_datamodule(args):
         cifar10_normalization(),
     ])
 
-    cifar10_dm = pl_bolts.datamodules.CIFAR10DataModule(
+    return pl_bolts.datamodules.CIFAR10DataModule(
         batch_size=args.batch_size,
         train_transforms=train_transforms,
         test_transforms=test_transforms,
         val_transforms=test_transforms,
     )
-
-    return cifar10_dm
 
 
 if __name__ == "__main__":

@@ -158,7 +158,6 @@ def test_state(tmpdir):
     assert isinstance(lightning_optimizer, Adam)
     assert isinstance(lightning_optimizer, Optimizer)
 
-    lightning_dict = {}
     special_attrs = [
         "_accumulate_grad_batches",
         "_optimizer",
@@ -175,9 +174,11 @@ def test_state(tmpdir):
         "_total_optimizer_step_calls",
     ]
 
-    for k, v in lightning_optimizer.__dict__.items():
-        if k not in special_attrs:
-            lightning_dict[k] = v
+    lightning_dict = {
+        k: v
+        for k, v in lightning_optimizer.__dict__.items()
+        if k not in special_attrs
+    }
 
     assert lightning_dict == optimizer.__dict__
     assert optimizer.state_dict() == lightning_optimizer.state_dict()

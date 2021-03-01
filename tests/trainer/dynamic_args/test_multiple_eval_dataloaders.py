@@ -132,8 +132,7 @@ def test_multiple_optimizers_multiple_dataloaders(tmpdir):
                 raise Exception('should only have two optimizers')
 
             self.training_step_called = True
-            loss = self.step(batch[0])
-            return loss
+            return self.step(batch[0])
 
         def training_epoch_end(self, outputs) -> None:
             # outputs should be an array with an entry per optimizer

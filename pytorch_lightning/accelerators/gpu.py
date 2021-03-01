@@ -40,6 +40,6 @@ class GPUAccelerator(Accelerator):
     def set_nvidia_flags() -> None:
         # set the correct cuda visible devices (using pci order)
         os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-        all_gpu_ids = ",".join([str(x) for x in range(torch.cuda.device_count())])
+        all_gpu_ids = ",".join(str(x) for x in range(torch.cuda.device_count()))
         devices = os.getenv("CUDA_VISIBLE_DEVICES", all_gpu_ids)
         _log.info(f"LOCAL_RANK: {os.getenv('LOCAL_RANK', 0)} - CUDA_VISIBLE_DEVICES: [{devices}]")

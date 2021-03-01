@@ -93,9 +93,7 @@ class DeterministicModel(LightningModule):
         """
         self.training_epoch_end_called = True
 
-        if self._distrib_type in (DistributedType.DP, DistributedType.DDP2):
-            pass
-        else:
+        if self._distrib_type not in (DistributedType.DP, DistributedType.DDP2):
             # only saw 4 batches
             assert len(outputs) == 4
             for batch_out in outputs:
@@ -154,9 +152,7 @@ class DeterministicModel(LightningModule):
     def training_epoch_end__dict(self, outputs):
         self.training_epoch_end_called = True
 
-        if self._distrib_type in (DistributedType.DP, DistributedType.DDP2):
-            pass
-        else:
+        if self._distrib_type not in (DistributedType.DP, DistributedType.DDP2):
             # only saw 4 batches
             assert len(outputs) == 4
             for batch_out in outputs:
@@ -179,8 +175,7 @@ class DeterministicModel(LightningModule):
 
     def validation_step__scalar_return(self, batch, batch_idx):
         self.validation_step_called = True
-        acc = self.step(batch, batch_idx)
-        return acc
+        return self.step(batch, batch_idx)
 
     def validation_step__dummy_dict_return(self, batch, batch_idx):
         self.validation_step_called = True

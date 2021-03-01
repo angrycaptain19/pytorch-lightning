@@ -67,7 +67,7 @@ def _basic_input_validation(preds: torch.Tensor, target: torch.Tensor, threshold
     if not preds_float and preds.min() < 0:
         raise ValueError("If `preds` are integers, they have to be non-negative.")
 
-    if not preds.shape[0] == target.shape[0]:
+    if preds.shape[0] != target.shape[0]:
         raise ValueError("The `preds` and `target` should have the same first dimension.")
 
     if preds_float and (preds.min() < 0 or preds.max() > 1):
@@ -76,10 +76,10 @@ def _basic_input_validation(preds: torch.Tensor, target: torch.Tensor, threshold
     if not 0 < threshold < 1:
         raise ValueError(f"The `threshold` should be a float in the (0,1) interval, got {threshold}")
 
-    if is_multiclass is False and target.max() > 1:
+    if not is_multiclass and target.max() > 1:
         raise ValueError("If you set `is_multiclass=False`, then `target` should not exceed 1.")
 
-    if is_multiclass is False and not preds_float and preds.max() > 1:
+    if not is_multiclass and not preds_float and preds.max() > 1:
         raise ValueError("If you set `is_multiclass=False` and `preds` are integers, then `preds` should not exceed 1.")
 
 
@@ -112,7 +112,7 @@ def _check_shape_and_type_consistency(preds: torch.Tensor, target: torch.Tensor)
         # Get the case
         if preds.ndim == 1 and preds_float:
             case = DataType.BINARY
-        elif preds.ndim == 1 and not preds_float:
+        elif preds.ndim == 1:
             case = DataType.MULTICLASS
         elif preds.ndim > 1 and preds_float:
             case = DataType.MULTILABEL
@@ -132,10 +132,7 @@ def _check_shape_and_type_consistency(preds: torch.Tensor, target: torch.Tensor)
 
         implied_classes = preds.shape[1]
 
-        if preds.ndim == 2:
-            case = DataType.MULTICLASS
-        else:
-            case = DataType.MULTIDIM_MULTICLASS
+        case = DataType.MULTICLASS if preds.ndim == 2 else DataType.MULTIDIM_MULTICLASS
     else:
         raise ValueError(
             "Either `preds` and `target` both should have the (same) shape (N, ...), or `target` should be (N, ...)"
@@ -174,22 +171,21 @@ def _check_num_classes_mc(
     and `is_multiclass` param for (multi-dimensional) multi-class data.
     """
 
-    if num_classes == 1 and is_multiclass is not False:
+    if num_classes == 1 and is_multiclass:
         raise ValueError(
             "You have set `num_classes=1`, but predictions are integers."
             " If you want to convert (multi-dimensional) multi-class data with 2 classes"
             " to binary/multi-label, set `is_multiclass=False`."
         )
     if num_classes > 1:
-        if is_multiclass is False:
-            if implied_classes != num_classes:
-                raise ValueError(
-                    "You have set `is_multiclass=False`, but the implied number of classes "
-                    " (from shape of inputs) does not match `num_classes`. If you are trying to"
-                    " transform multi-dim multi-class data with 2 classes to multi-label, `num_classes`"
-                    " should be either None or the product of the size of extra dimensions (...)."
-                    " See Input Types in Metrics documentation."
-                )
+        if not is_multiclass and implied_classes != num_classes:
+            raise ValueError(
+                "You have set `is_multiclass=False`, but the implied number of classes "
+                " (from shape of inputs) does not match `num_classes`. If you are trying to"
+                " transform multi-dim multi-class data with 2 classes to multi-label, `num_classes`"
+                " should be either None or the product of the size of extra dimensions (...)."
+                " See Input Types in Metrics documentation."
+            )
         if num_classes <= target.max():
             raise ValueError("The highest label in `target` should be smaller than `num_classes`.")
         if num_classes <= preds.max():
@@ -299,13 +295,18 @@ def _check_classification_inputs(
     case, implied_classes = _check_shape_and_type_consistency(preds, target)
 
     # For (multi-dim) multi-class case with prob preds, check that preds sum up to 1
-    if case in (DataType.MULTICLASS, DataType.MULTIDIM_MULTICLASS) and preds.is_floating_point():
-        if not torch.isclose(preds.sum(dim=1), torch.ones_like(preds.sum(dim=1))).all():
-            raise ValueError("Probabilities in `preds` must sum up to 1 accross the `C` dimension.")
+    if (
+        case in (DataType.MULTICLASS, DataType.MULTIDIM_MULTICLASS)
+        and preds.is_floating_point()
+        and not torch.isclose(
+            preds.sum(dim=1), torch.ones_like(preds.sum(dim=1))
+        ).all()
+    ):
+        raise ValueError("Probabilities in `preds` must sum up to 1 accross the `C` dimension.")
 
     # Check consistency with the `C` dimension in case of multi-class data
     if preds.shape != target.shape:
-        if is_multiclass is False and implied_classes != 2:
+        if not is_multiclass and implied_classes != 2:
             raise ValueError(
                 "You have set `is_multiclass=False`, but have more than 2 classes in your data,"
                 " based on the C dimension of `preds`."
@@ -446,12 +447,15 @@ def _input_format_classification(
     if case == DataType.MULTILABEL and top_k:
         preds = select_topk(preds, top_k)
 
-    if case in (DataType.MULTICLASS, DataType.MULTIDIM_MULTICLASS) or is_multiclass:
+    if (
+        case in (DataType.MULTICLASS, DataType.MULTIDIM_MULTICLASS)
+        or is_multiclass
+    ):
         if preds.is_floating_point():
             num_classes = preds.shape[1]
             preds = select_topk(preds, top_k or 1)
         else:
-            num_classes = num_classes if num_classes else max(preds.max(), target.max()) + 1
+            num_classes = num_classes or max(preds.max(), target.max()) + 1
             preds = to_onehot(preds, max(2, num_classes))
 
         target = to_onehot(target, max(2, num_classes))
@@ -510,11 +514,7 @@ model_evaluation.html#multiclass-and-multilabel-classification>`__.
     zero_div_mask = denominator == 0
     ignore_mask = denominator < 0
 
-    if weights is None:
-        weights = torch.ones_like(denominator)
-    else:
-        weights = weights.float()
-
+    weights = torch.ones_like(denominator) if weights is None else weights.float()
     numerator = torch.where(zero_div_mask, torch.tensor(float(zero_division), device=numerator.device), numerator)
     denominator = torch.where(zero_div_mask | ignore_mask, torch.tensor(1.0, device=denominator.device), denominator)
     weights = torch.where(ignore_mask, torch.tensor(0.0, device=weights.device), weights)

@@ -603,11 +603,10 @@ def test_log_works_in_val_callback(tmpdir):
 
         if func_attr["on_epoch"] and not func_attr["on_step"]:
             # Apply mean on values
-            expected_output = np.mean(original_values)
+            return np.mean(original_values)
         else:
             # Keep the latest value
-            expected_output = np.max(original_values)
-        return expected_output
+            return np.max(original_values)
 
     # Make sure the func_name output equals the average from all logged values when on_epoch true
     # pop extra keys
@@ -787,10 +786,9 @@ def test_log_works_in_test_callback(tmpdir):
     def get_expected_output(func_attr, original_values):
         # Apply mean on values
         if func_attr["on_epoch"] and not func_attr["on_step"]:
-            expected_output = np.mean(original_values)
+            return np.mean(original_values)
         else:
-            expected_output = np.max(original_values)
-        return expected_output
+            return np.max(original_values)
 
     # Make sure the func_name output equals the average from all logged values when on_epoch true
     # pop extra keys

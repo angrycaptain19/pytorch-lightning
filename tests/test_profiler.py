@@ -25,7 +25,7 @@ PROFILER_OVERHEAD_MAX_TOLERANCE = 0.0005
 
 
 def _get_python_cprofile_total_duration(profile):
-    return sum([x.inlinetime for x in profile.getstats()])
+    return sum(x.inlinetime for x in profile.getstats())
 
 
 def _sleep_generator(durations):
@@ -40,14 +40,12 @@ def _sleep_generator(durations):
 
 @pytest.fixture
 def simple_profiler():
-    profiler = SimpleProfiler()
-    return profiler
+    return SimpleProfiler()
 
 
 @pytest.fixture
 def advanced_profiler(tmpdir):
-    profiler = AdvancedProfiler(output_filename=os.path.join(tmpdir, "profiler.txt"))
-    return profiler
+    return AdvancedProfiler(output_filename=os.path.join(tmpdir, "profiler.txt"))
 
 
 @pytest.mark.parametrize(["action", "expected"], [

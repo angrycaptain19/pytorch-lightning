@@ -31,19 +31,19 @@ class CallbackHookNameValidator:
 
         current_callback_hook_auth_args = internal_func()
 
-        if current_callback_hook_auth_args is not None:
-            m = "{} function supports only {} in {}. Provided {}"
-            if on_step not in current_callback_hook_auth_args["on_step"]:
-                msg = m.format(current_hook_fx_name, "on_step", current_callback_hook_auth_args["on_step"], on_step)
-                raise MisconfigurationException(msg)
-
-            if on_epoch not in current_callback_hook_auth_args["on_epoch"]:
-                msg = m.format(current_hook_fx_name, "on_epoch", current_callback_hook_auth_args["on_epoch"], on_epoch)
-                raise MisconfigurationException(msg)
-        else:
+        if current_callback_hook_auth_args is None:
             raise MisconfigurationException(
                 f"{current_hook_fx_name} function doesn't support logging using self.log() yet."
             )
+
+        m = "{} function supports only {} in {}. Provided {}"
+        if on_step not in current_callback_hook_auth_args["on_step"]:
+            msg = m.format(current_hook_fx_name, "on_step", current_callback_hook_auth_args["on_step"], on_step)
+            raise MisconfigurationException(msg)
+
+        if on_epoch not in current_callback_hook_auth_args["on_epoch"]:
+            msg = m.format(current_hook_fx_name, "on_epoch", current_callback_hook_auth_args["on_epoch"], on_epoch)
+            raise MisconfigurationException(msg)
 
     @staticmethod
     def _on_before_accelerator_backend_setup_log():

@@ -73,8 +73,10 @@ def track_data_hook_calls(fn):
         obj = args[0]
 
         # If calling setup, we check the stage and assign stage-specific bool args
-        if fn.__name__ == "setup":
+        if fn.__name__ == "prepare_data":
+            obj._has_prepared_data = True
 
+        elif fn.__name__ == "setup":
             # Get stage either by grabbing from args or checking kwargs.
             # If not provided, set call status of 'fit' and 'test' to True.
             # We do this so __attach_datamodule in trainer.py doesn't mistakenly call setup('test') on trainer.test()
@@ -85,9 +87,6 @@ def track_data_hook_calls(fn):
 
             if stage == "test" or stage is None:
                 obj._has_setup_test = True
-
-        if fn.__name__ == "prepare_data":
-            obj._has_prepared_data = True
 
         return fn(*args, **kwargs)
 
@@ -320,7 +319,10 @@ class LightningDataModule(CheckpointHooks, DataHooks, metaclass=_DataModuleWrapp
 
         # we only want to pass in valid DataModule args, the rest may be user specific
         valid_kwargs = inspect.signature(cls.__init__).parameters
-        datamodule_kwargs = dict((name, params[name]) for name in valid_kwargs if name in params)
+        datamodule_kwargs = {
+            name: params[name] for name in valid_kwargs if name in params
+        }
+
         datamodule_kwargs.update(**kwargs)
 
         return cls(**datamodule_kwargs)

@@ -68,7 +68,7 @@ class LightningLoggerBase(ABC):
     ):
         self._prev_step: int = -1
         self._metrics_to_agg: List[Dict[str, float]] = []
-        self._agg_key_funcs = agg_key_funcs if agg_key_funcs else {}
+        self._agg_key_funcs = agg_key_funcs or {}
         self._agg_default_func = agg_default_func
 
     def update_agg_funcs(
@@ -239,8 +239,7 @@ class LightningLoggerBase(ABC):
                     key = str(key)
                     if isinstance(value, (MutableMapping, Namespace)):
                         value = vars(value) if isinstance(value, Namespace) else value
-                        for d in _dict_generator(value, prefixes + [key]):
-                            yield d
+                        yield from _dict_generator(value, prefixes + [key])
                     else:
                         yield prefixes + [key, value if value is not None else str(None)]
             else:
@@ -270,11 +269,11 @@ class LightningLoggerBase(ABC):
          'namespace': 'Namespace(foo=3)',
          'string': 'abc'}
         """
-        for k in params.keys():
+        for k, v in params.items():
             # convert relevant np scalars to python types first (instead of str)
             if isinstance(params[k], (np.bool_, np.integer, np.floating)):
                 params[k] = params[k].item()
-            elif type(params[k]) not in [bool, int, float, str, torch.Tensor]:
+            elif type(v) not in [bool, int, float, str, torch.Tensor]:
                 params[k] = str(params[k])
         return params
 
@@ -402,11 +401,11 @@ class LoggerCollection(LightningLoggerBase):
 
     @property
     def name(self) -> str:
-        return '_'.join([str(logger.name) for logger in self._logger_iterable])
+        return '_'.join(str(logger.name) for logger in self._logger_iterable)
 
     @property
     def version(self) -> str:
-        return '_'.join([str(logger.version) for logger in self._logger_iterable])
+        return '_'.join(str(logger.version) for logger in self._logger_iterable)
 
 
 class DummyExperiment(object):

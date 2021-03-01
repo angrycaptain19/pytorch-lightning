@@ -196,7 +196,7 @@ class LoggerConnector:
             pbar_metrics_tmp.update(batch_pbar_metrics)
 
         # track progress bar metrics
-        if len(pbar_metrics_tmp) > 0:
+        if pbar_metrics_tmp:
             self.add_progress_bar_metrics(pbar_metrics_tmp)
 
         self._callback_metrics.update(callback_metrics_tmp)
@@ -273,10 +273,9 @@ class LoggerConnector:
     def add_to_eval_loop_results(self, dl_idx, has_been_initialized):
         callback_metrics = deepcopy(self.evaluation_callback_metrics)
         for key in list(callback_metrics.keys()):
-            if "dataloader_idx" in key:
-                if f"dataloader_idx_{dl_idx}" not in key:
-                    # remove dl_idx from self.callback_metrics not belonging to this dataset.
-                    del callback_metrics[key]
+            if "dataloader_idx" in key and f"dataloader_idx_{dl_idx}" not in key:
+                # remove dl_idx from self.callback_metrics not belonging to this dataset.
+                del callback_metrics[key]
         if has_been_initialized:
             self.eval_loop_results[dl_idx].update(callback_metrics)
         else:
@@ -368,7 +367,7 @@ class LoggerConnector:
         if self.trainer.testing:
             self.trainer.logger_connector.evaluation_callback_metrics.update(callback_metrics)
 
-        if len(dataloader_result_metrics) > 0:
+        if dataloader_result_metrics:
             self.eval_loop_results.append(dataloader_result_metrics)
 
     def __process_eval_epoch_end_results_and_log_legacy(self, eval_results):
@@ -557,7 +556,7 @@ class LoggerConnector:
                 if len(tbptt_outs) > 1:
                     time_reduced_outputs.append(tbptt_outs)
 
-            if len(time_reduced_outputs) == 0:
+            if not time_reduced_outputs:
                 continue
 
             # reduce across training steps

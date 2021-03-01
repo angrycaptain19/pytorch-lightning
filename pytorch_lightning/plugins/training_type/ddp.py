@@ -80,8 +80,10 @@ class DDPPlugin(ParallelPlugin):
 
     @property
     def distributed_sampler_kwargs(self):
-        distributed_sampler_kwargs = dict(num_replicas=(self.num_nodes * self.num_processes), rank=self.global_rank)
-        return distributed_sampler_kwargs
+        return dict(
+            num_replicas=(self.num_nodes * self.num_processes),
+            rank=self.global_rank,
+        )
 
     def setup(self, model):
         self._model = model
@@ -133,7 +135,10 @@ class DDPPlugin(ParallelPlugin):
         if self.parallel_devices is None:
             raise MisconfigurationException("you selected (distribute_backend = ddp) but did not set Trainer(gpus=?)")
 
-        os.environ["PL_TRAINER_GPUS"] = ",".join([str(device.index) for device in self.parallel_devices])
+        os.environ["PL_TRAINER_GPUS"] = ",".join(
+            str(device.index) for device in self.parallel_devices
+        )
+
         os.environ["PL_IN_DDP_SUBPROCESS"] = "1"
 
         if self.lightning_module.logger is not None:
@@ -155,11 +160,10 @@ class DDPPlugin(ParallelPlugin):
             # start process
             # if hydra is available and initialized, make sure to set the cwd correctly
             cwd: Optional[str] = None
-            if _HYDRA_AVAILABLE:
-                if HydraConfig.initialized():
-                    cwd = get_original_cwd()
-                    os_cwd = f'"{os.getcwd()}"'
-                    command += [f'hydra.run.dir={os_cwd}', f'hydra.job.name=train_ddp_process_{local_rank}']
+            if _HYDRA_AVAILABLE and HydraConfig.initialized():
+                cwd = get_original_cwd()
+                os_cwd = f'"{os.getcwd()}"'
+                command += [f'hydra.run.dir={os_cwd}', f'hydra.job.name=train_ddp_process_{local_rank}']
             proc = subprocess.Popen(command, env=env_copy, cwd=cwd)
             self.interactive_ddp_procs.append(proc)
 

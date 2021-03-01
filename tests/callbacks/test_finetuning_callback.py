@@ -108,8 +108,7 @@ def test_finetuning_callback_warning(tmpdir):
             return DataLoader(RandomDataset(32, 64), batch_size=2)
 
         def configure_optimizers(self):
-            optimizer = torch.optim.SGD(self.parameters(), lr=0.1)
-            return optimizer
+            return torch.optim.SGD(self.parameters(), lr=0.1)
 
     class TestCallback(BackboneFinetuning):
 

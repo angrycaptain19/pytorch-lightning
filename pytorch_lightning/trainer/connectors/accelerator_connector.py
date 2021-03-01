@@ -281,14 +281,13 @@ class AcceleratorConnector(object):
     @property
     def parallel_devices(self) -> List[Union[torch.device, int]]:
         if self.on_gpu:
-            devices = [torch.device("cuda", i) for i in self.parallel_device_ids]
+            return [torch.device("cuda", i) for i in self.parallel_device_ids]
         elif self.on_tpu:
             # explicitly don't make a tpu device here!
             # https://github.com/PyTorchLightning/pytorch-lightning/issues/3169
-            devices = [i for i in self.parallel_device_ids]
+            return [i for i in self.parallel_device_ids]
         else:
-            devices = [torch.device("cpu")] * self.num_processes
-        return devices
+            return [torch.device("cpu")] * self.num_processes
 
     @property
     def root_gpu(self) -> Optional[int]:
@@ -296,8 +295,9 @@ class AcceleratorConnector(object):
 
     @property
     def is_using_torchelastic(self) -> bool:
-        te_flags_passed = "WORLD_SIZE" in os.environ and ("GROUP_RANK" in os.environ or "NODE_RANK" in os.environ)
-        return te_flags_passed
+        return "WORLD_SIZE" in os.environ and (
+            "GROUP_RANK" in os.environ or "NODE_RANK" in os.environ
+        )
 
     def select_precision_plugin(self) -> PrecisionPlugin:
         # set precision type

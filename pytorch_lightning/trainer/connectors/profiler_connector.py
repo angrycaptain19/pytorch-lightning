@@ -44,14 +44,13 @@ class ProfilerConnector:
                 f" Received {profiler} which is of type {type(profiler)}."
             )
         if isinstance(profiler, str):
-            if profiler.lower() in PROFILERS:
-                profiler_class = PROFILERS[profiler.lower()]
-                profiler = profiler_class()
-            else:
+            if profiler.lower() not in PROFILERS:
                 raise ValueError(
                     "When passing string value for the `profiler` parameter of"
                     " `Trainer`, it can only be 'simple' or 'advanced'"
                 )
+            profiler_class = PROFILERS[profiler.lower()]
+            profiler = profiler_class()
         self.trainer.profiler = profiler or PassThroughProfiler()
 
     def on_train_start(self, trainer):

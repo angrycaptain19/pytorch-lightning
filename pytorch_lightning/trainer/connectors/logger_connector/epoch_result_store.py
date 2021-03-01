@@ -174,7 +174,7 @@ class HookResultStore:
                         if len(tbptt_outputs) > 1:
                             time_reduced_outputs.append(tbptt_outputs)
 
-                    if len(time_reduced_outputs) == 0:
+                    if not time_reduced_outputs:
                         continue
 
                     # reduce across training steps

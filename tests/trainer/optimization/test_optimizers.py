@@ -321,8 +321,7 @@ def test_configure_optimizer_from_dict(tmpdir):
     class CurrentModel(EvalModelTemplate):
 
         def configure_optimizers(self):
-            config = {'optimizer': torch.optim.SGD(params=self.parameters(), lr=1e-03)}
-            return config
+            return {'optimizer': torch.optim.SGD(params=self.parameters(), lr=1e-03)}
 
     hparams = EvalModelTemplate.get_default_hparams()
     model = CurrentModel(**hparams)
@@ -384,13 +383,8 @@ def test_multiple_optimizers_callbacks(tmpdir):
             self.layer_2 = torch.nn.Linear(32, 2)
 
         def training_step(self, batch, batch_idx, optimizer_idx):
-            if optimizer_idx == 0:
-                a = batch[0]
-                acc = self.layer_1(a)
-            else:
-                a = batch[0]
-                acc = self.layer_2(a)
-
+            a = batch[0]
+            acc = self.layer_1(a) if optimizer_idx == 0 else self.layer_2(a)
             acc = self.loss(acc, acc)
             return acc
 

@@ -37,7 +37,6 @@ def is_overridden(method_name: str, model: Union[LightningModule, LightningDataM
         # cannot pickle __code__ so cannot verify if PatchDataloader
         # exists which shows dataloader methods have been overwritten.
         # so, we hack it by using the string representation
-        is_overridden = instance_attr.patch_loader_code != str(super_attr.__code__)
+        return instance_attr.patch_loader_code != str(super_attr.__code__)
     else:
-        is_overridden = instance_attr.__code__ is not super_attr.__code__
-    return is_overridden
+        return instance_attr.__code__ is not super_attr.__code__

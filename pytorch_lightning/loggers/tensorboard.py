@@ -114,8 +114,7 @@ class TensorBoardLogger(LightningLoggerBase):
         """
         # create a pseudo standard path ala test-tube
         version = self.version if isinstance(self.version, str) else f"version_{self.version}"
-        log_dir = os.path.join(self.root_dir, version)
-        return log_dir
+        return os.path.join(self.root_dir, version)
 
     @property
     def save_dir(self) -> Optional[str]:
@@ -262,7 +261,7 @@ class TensorBoardLogger(LightningLoggerBase):
             if self._fs.isdir(d) and bn.startswith("version_"):
                 dir_ver = bn.split("_")[1].replace('/', '')
                 existing_versions.append(int(dir_ver))
-        if len(existing_versions) == 0:
+        if not existing_versions:
             return 0
 
         return max(existing_versions) + 1

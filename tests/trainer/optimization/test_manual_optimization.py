@@ -701,8 +701,7 @@ def test_step_with_optimizer_closure(tmpdir):
                 x = F.dropout(x, 0.1)
                 predictions = self(x)
                 predictions = F.dropout(predictions, 0.1)
-                loss = self.loss(None, predictions)
-                return loss
+                return self.loss(None, predictions)
 
             def optimizer_closure():
                 # emulate bayesian optimization.
@@ -732,8 +731,7 @@ def test_step_with_optimizer_closure(tmpdir):
             assert len(outputs) == 2
 
         def configure_optimizers(self):
-            optimizer = torch.optim.SGD(self.layer.parameters(), lr=0.1)
-            return optimizer
+            return torch.optim.SGD(self.layer.parameters(), lr=0.1)
 
     model = TestModel()
     model.val_dataloader = None
@@ -796,8 +794,7 @@ def test_step_with_optimizer_closure_and_accumulated_grad(tmpdir):
             assert len(outputs) == 2
 
         def configure_optimizers(self):
-            optimizer = torch.optim.SGD(self.layer.parameters(), lr=0.1)
-            return optimizer
+            return torch.optim.SGD(self.layer.parameters(), lr=0.1)
 
     model = TestModel()
     model.val_dataloader = None
@@ -853,8 +850,7 @@ def test_step_with_optimizer_closure_and_extra_arguments(step_mock, tmpdir):
             assert len(outputs) == 2
 
         def configure_optimizers(self):
-            optimizer = torch.optim.SGD(self.layer.parameters(), lr=0.1)
-            return optimizer
+            return torch.optim.SGD(self.layer.parameters(), lr=0.1)
 
     model = TestModel()
     model.val_dataloader = None
@@ -902,8 +898,7 @@ def test_step_with_optimizer_closure_with_different_frequencies(mock_sgd_step, m
                 x = F.dropout(x, 0.1)
                 predictions = self(x)
                 predictions = F.dropout(predictions, 0.1)
-                loss = self.loss(None, predictions)
-                return loss
+                return self.loss(None, predictions)
 
             def gen_closure():
                 loss_gen = compute_loss()
@@ -1074,9 +1069,7 @@ def train_manual_optimization(tmpdir, accelerator, model_cls=TesManualOptimizati
 
 
 @pytest.mark.skipif(torch.cuda.device_count() < 2, reason="test requires multi-GPU machine")
-@pytest.mark.skipif(
-    not os.getenv("PL_RUNNING_SPECIAL_TESTS", '0') == '1', reason="test should be run outside of pytest"
-)
+@pytest.mark.skipif(os.getenv("PL_RUNNING_SPECIAL_TESTS", '0') != '1', reason="test should be run outside of pytest")
 def test_step_with_optimizer_closure_with_different_frequencies_ddp(tmpdir):
     """
     Tests that `step` works with optimizer_closure and different accumulated_gradient frequency
@@ -1152,8 +1145,6 @@ class TesManualOptimizationDDPModelToggleModel(TesManualOptimizationDDPModel):
 
 
 @pytest.mark.skipif(torch.cuda.device_count() < 2, reason="test requires multi-GPU machine")
-@pytest.mark.skipif(
-    not os.getenv("PL_RUNNING_SPECIAL_TESTS", '0') == '1', reason="test should be run outside of pytest"
-)
+@pytest.mark.skipif(os.getenv("PL_RUNNING_SPECIAL_TESTS", '0') != '1', reason="test should be run outside of pytest")
 def test_step_with_optimizer_closure_with_different_frequencies_ddp_with_toggle_model(tmpdir):
     train_manual_optimization(tmpdir, "ddp", model_cls=TesManualOptimizationDDPModelToggleModel)

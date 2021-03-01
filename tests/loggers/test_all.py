@@ -52,8 +52,7 @@ def _get_logger_args(logger_class, save_dir):
 def _instantiate_logger(logger_class, save_idr, **override_kwargs):
     args = _get_logger_args(logger_class, save_idr)
     args.update(**override_kwargs)
-    logger = logger_class(**args)
-    return logger
+    return logger_class(**args)
 
 
 def test_loggers_fit_test_all(tmpdir, monkeypatch):

@@ -266,8 +266,10 @@ class TrainerProperties(ABC):
     def enable_validation(self) -> bool:
         """ Check if we should run validation during training. """
         model_ref = self.lightning_module
-        val_loop_enabled = is_overridden('validation_step', model_ref) and self.limit_val_batches > 0
-        return val_loop_enabled
+        return (
+            is_overridden('validation_step', model_ref)
+            and self.limit_val_batches > 0
+        )
 
     @property
     def default_root_dir(self) -> str:

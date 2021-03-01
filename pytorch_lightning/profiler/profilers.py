@@ -537,10 +537,9 @@ class PyTorchProfiler(BaseProfiler):
             if self.emit_nvtx:
                 return output_string
 
-            else:
-                data = function_events.key_averages(group_by_input_shapes=self.group_by_input_shapes)
-                table = data.table(sort_by=self.sort_by_key, row_limit=self.row_limit)
-                recorded_stats[action_name] = table
+            data = function_events.key_averages(group_by_input_shapes=self.group_by_input_shapes)
+            table = data.table(sort_by=self.sort_by_key, row_limit=self.row_limit)
+            recorded_stats[action_name] = table
 
         # log to standard out
         output_string = f"{os.linesep}Profiler Report{os.linesep}"

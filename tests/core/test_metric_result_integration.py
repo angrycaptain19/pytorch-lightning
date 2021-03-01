@@ -56,7 +56,7 @@ def _ddp_test_fn(rank, worldsize):
     # dist_sync_on_step is False by default
     result = Result()
 
-    for epoch in range(3):
+    for _ in range(3):
         cumulative_sum = 0
 
         for i in range(5):
@@ -73,8 +73,8 @@ def _ddp_test_fn(rank, worldsize):
             batch_log = result.get_batch_log_metrics()
             batch_expected = {"a_step": i, "a": i, "c": i}
             assert set(batch_log.keys()) == set(batch_expected.keys())
-            for k in batch_expected.keys():
-                assert batch_expected[k] == batch_log[k]
+            for k, v_ in batch_expected.items():
+                assert v_ == batch_log[k]
 
         epoch_log = result.get_epoch_log_metrics()
 
@@ -86,8 +86,8 @@ def _ddp_test_fn(rank, worldsize):
         epoch_expected = {"b": cumulative_sum * worldsize, "a_epoch": cumulative_sum * worldsize}
 
         assert set(epoch_log.keys()) == set(epoch_expected.keys())
-        for k in epoch_expected.keys():
-            assert epoch_expected[k] == epoch_log[k]
+        for k, v in epoch_expected.items():
+            assert v == epoch_log[k]
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="DDP not available on windows")
@@ -107,7 +107,7 @@ def test_result_metric_integration():
 
     result = Result()
 
-    for epoch in range(3):
+    for _ in range(3):
         cumulative_sum = 0
 
         for i in range(5):
@@ -124,8 +124,8 @@ def test_result_metric_integration():
             batch_log = result.get_batch_log_metrics()
             batch_expected = {"a_step": i, "a": i, "c": i}
             assert set(batch_log.keys()) == set(batch_expected.keys())
-            for k in batch_expected.keys():
-                assert batch_expected[k] == batch_log[k]
+            for k, v_ in batch_expected.items():
+                assert v_ == batch_log[k]
 
         epoch_log = result.get_epoch_log_metrics()
 
@@ -137,5 +137,5 @@ def test_result_metric_integration():
         epoch_expected = {"b": cumulative_sum, "a_epoch": cumulative_sum}
 
         assert set(epoch_log.keys()) == set(epoch_expected.keys())
-        for k in epoch_expected.keys():
-            assert epoch_expected[k] == epoch_log[k]
+        for k, v in epoch_expected.items():
+            assert v == epoch_log[k]
